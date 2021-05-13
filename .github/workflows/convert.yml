@@ -61,11 +61,11 @@ jobs:
         cp -R ConvRepo/___res/. "ThisRepo/Сгенерированные страницы/___res"
 
         # Автор коммита
-        git config --global user.email "[bot]@users.noreply.github.com"
-        git config --global user.name "[bot]"
+        git config --global user.email "[бот]@users.noreply.github.com"
+        git config --global user.name "[бот]"
 
         # Отправляем изменения в текущий репозиторий
         cd ThisRepo
         git add -A
-        git diff-index --quiet HEAD || git commit -m "Update" # Создаём коммит, только если есть изменения
+        git diff-index --quiet HEAD || git commit -m "Markdown > HTML" # Создаём коммит, только если есть изменения
         git push origin master
