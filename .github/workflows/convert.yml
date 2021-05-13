@@ -1,0 +1,71 @@
+# Данный workflow конвертирует документацию из Markdown в HTML
+
+# Отображаемое имя workflow
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#name
+name: Конвертация документации
+
+on:
+  # Запускается, если в ветке master в папке `Исходники статей` были изменения
+  # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#push
+  # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onpushpull_requestbranchestags
+  # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#onpushpull_requestpaths
+  push:
+    branches:
+    - master
+    paths:
+    - Исходники статей/**
+
+  # Также можно запустить вручную
+  # https://docs.github.com/en/actions/reference/events-that-trigger-workflows#manual-events
+  workflow_dispatch:
+
+jobs:
+  # Идентификатор job
+  # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_id
+  Konvertaciya:
+    # Будет запущен на виртуальной машине с последней версией Ubuntu
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: ubuntu-latest
+
+    # Отображаемое имя job 
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idname
+    name: Конвертация документации
+
+    # Последовательность задач
+    # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idsteps
+    steps:
+
+    - name: Конвертируем документацию # Отображаемое имя step
+
+      run: |
+        # Скачиваем текущий репозиторий в папку ThisRepo.
+        # Так как используется токен, то будут иметься права на запись в этот репозиторий
+        git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Dviglo/GameDevDocs.git" ThisRepo
+
+        # Удаляем директорию, если существует
+        rm -rf "ThisRepo/Сгенерированные страницы"
+
+        # Скачиваем исходники конвертора в папку ConvRepo
+        git clone https://github.com/Dviglo/md2html ConvRepo
+
+        # Создаём проект в папке ConvBuild
+        cmake ConvRepo -B ConvBuild
+
+        # Компилируем. Скомпилированная программа будет помещена в папку ConvBuild/Result
+        cmake --build ConvBuild
+
+        # Конвертируем Markdown в HTML
+        ./ConvBuild/Result/md2html "ThisRepo/Исходники статей" "ThisRepo/Сгенерированные страницы"
+
+        # Копируем содержимое папки с ресурсами
+        cp -R ConvRepo/___res/. "ThisRepo/Сгенерированные страницы/___res"
+
+        # Автор коммита
+        git config --global user.email "[bot]@users.noreply.github.com"
+        git config --global user.name "[bot]"
+
+        # Отправляем изменения в текущий репозиторий
+        cd ThisRepo
+        git add -A
+        git diff-index --quiet HEAD || git commit -m "Update" # Создаём коммит, только если есть изменения
+        git push origin master
