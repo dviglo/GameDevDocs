@@ -1,4 +1,4 @@
-# Данный workflow конвертирует документацию из Markdown в HTML
+# Данный workflow преобразует документацию из Markdown в HTML
 
 # Отображаемое имя workflow
 # https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#name
@@ -40,7 +40,7 @@ jobs:
       run: |
         # Скачиваем текущий репозиторий в папку ThisRepo.
         # Так как используется токен, то будут иметься права на запись в этот репозиторий
-        git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Dviglo/GameDevDocs.git" ThisRepo
+        git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Dviglo/GameDevDocs" ThisRepo
 
         # Удаляем директорию, если существует
         rm -rf "ThisRepo/Сгенерированные страницы"
